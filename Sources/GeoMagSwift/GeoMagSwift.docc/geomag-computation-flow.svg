@@ -1,66 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
-  <title id="title">GeoMagSwift Computation Flow</title>
-  <desc id="desc">From input date and coordinates to interpolated coefficients, spherical harmonics synthesis, and magnetic field outputs with secular variation.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1500" viewBox="0 0 900 1500" role="img" aria-labelledby="title desc">
+  <title id="title">GeoMagSwift Computation Flow (Vertical)</title>
+  <desc id="desc">Vertical flow from input date and coordinates to model selection, interpolation, spherical harmonics synthesis, and final magnetic field outputs.</desc>
   <defs>
     <style>
       .bg { fill: #f8fafc; }
-      .box { fill: #ffffff; stroke: #0f172a; stroke-width: 2; rx: 12; ry: 12; }
-      .title { font: 700 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
-      .text { font: 500 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1e293b; }
-      .sub { font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #334155; }
-      .line { stroke: #0f172a; stroke-width: 2.5; fill: none; }
-      .accent { fill: #dbeafe; stroke: #1d4ed8; stroke-width: 2; }
+      .box { fill: #ffffff; stroke: #0f172a; stroke-width: 2; rx: 14; ry: 14; }
+      .accent { fill: #dbeafe; stroke: #1d4ed8; stroke-width: 2; rx: 14; ry: 14; }
+      .title { font: 700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .h { font: 700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .t { font: 500 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1e293b; }
+      .line { stroke: #0f172a; stroke-width: 3; fill: none; }
     </style>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a" />
     </marker>
   </defs>
 
-  <rect class="bg" x="0" y="0" width="1200" height="520" />
-  <text class="title" x="40" y="42">GeoMagSwift Magnetic Field Computation Flow</text>
+  <rect class="bg" x="0" y="0" width="900" height="1500"/>
+  <text class="title" x="40" y="52">GeoMagSwift Magnetic Field Computation Flow</text>
 
-  <rect class="box" x="40" y="80" width="220" height="120" />
-  <text class="text" x="62" y="115">Input</text>
-  <text class="sub" x="62" y="145">- Date</text>
-  <text class="sub" x="62" y="168">- Latitude / Longitude</text>
-  <text class="sub" x="62" y="191">- Altitude (km)</text>
+  <rect class="box" x="110" y="90" width="680" height="120"/>
+  <text class="h" x="140" y="135">1) Input</text>
+  <text class="t" x="140" y="170">Date, latitude, longitude, altitude (km)</text>
 
-  <rect class="box" x="320" y="80" width="260" height="120" />
-  <text class="text" x="342" y="115">Model Selection</text>
-  <text class="sub" x="342" y="145">SHCModel.bestModel(for: date)</text>
-  <text class="sub" x="342" y="168">or specified model</text>
+  <path class="line" d="M450 210 L450 250" marker-end="url(#arrow)"/>
 
-  <rect class="box" x="640" y="80" width="250" height="120" />
-  <text class="text" x="662" y="115">Date Normalization</text>
-  <text class="sub" x="662" y="145">Date -> Decimal Year</text>
-  <text class="sub" x="662" y="168">DateUtils.decimalYear</text>
+  <rect class="box" x="110" y="260" width="680" height="120"/>
+  <text class="h" x="140" y="305">2) Model Selection</text>
+  <text class="t" x="140" y="340">Use SHCModel.bestModel(for: date) or a specified model</text>
 
-  <rect class="box" x="940" y="80" width="220" height="120" />
-  <text class="text" x="962" y="115">Epoch Interpolation</text>
-  <text class="sub" x="962" y="145">Interpolate g/h</text>
-  <text class="sub" x="962" y="168">Compute gDot/hDot</text>
+  <path class="line" d="M450 380 L450 420" marker-end="url(#arrow)"/>
 
-  <rect class="box accent" x="230" y="280" width="300" height="140" />
-  <text class="text" x="252" y="315">Spherical Harmonics</text>
-  <text class="sub" x="252" y="345">fieldComponents(nmax, g, h, ...)</text>
-  <text class="sub" x="252" y="368">-> Main field (X, Y, Z)</text>
+  <rect class="box" x="110" y="430" width="680" height="120"/>
+  <text class="h" x="140" y="475">3) Date Normalization</text>
+  <text class="t" x="140" y="510">Convert date to decimal year via DateUtils.decimalYear</text>
 
-  <rect class="box accent" x="640" y="280" width="300" height="140" />
-  <text class="text" x="662" y="315">Secular Variation</text>
-  <text class="sub" x="662" y="345">fieldComponents(nmax, gDot, hDot, ...)</text>
-  <text class="sub" x="662" y="368">-> Derivatives per year</text>
+  <path class="line" d="M450 550 L450 590" marker-end="url(#arrow)"/>
 
-  <rect class="box" x="980" y="280" width="180" height="140" />
-  <text class="text" x="1002" y="315">Output</text>
-  <text class="sub" x="1002" y="345">MagneticFieldSolution</text>
-  <text class="sub" x="1002" y="368">mainField +</text>
-  <text class="sub" x="1002" y="391">secularVariation</text>
+  <rect class="box" x="110" y="600" width="680" height="120"/>
+  <text class="h" x="140" y="645">4) Epoch Interpolation</text>
+  <text class="t" x="140" y="680">Interpolate g/h and compute gDot/hDot between epochs</text>
 
-  <path class="line" d="M260 140 L320 140" marker-end="url(#arrow)" />
-  <path class="line" d="M580 140 L640 140" marker-end="url(#arrow)" />
-  <path class="line" d="M890 140 L940 140" marker-end="url(#arrow)" />
+  <path class="line" d="M450 720 L450 760" marker-end="url(#arrow)"/>
 
-  <path class="line" d="M1050 200 L1050 260 L530 260 L530 310" marker-end="url(#arrow)" />
-  <path class="line" d="M530 350 L640 350" marker-end="url(#arrow)" />
-  <path class="line" d="M940 350 L980 350" marker-end="url(#arrow)" />
+  <rect class="accent" x="110" y="770" width="680" height="140"/>
+  <text class="h" x="140" y="815">5) Main Field Synthesis</text>
+  <text class="t" x="140" y="850">fieldComponents(nmax, g, h, ...)</text>
+  <text class="t" x="140" y="880">Obtain X (north), Y (east), Z (down)</text>
+
+  <path class="line" d="M450 910 L450 950" marker-end="url(#arrow)"/>
+
+  <rect class="accent" x="110" y="960" width="680" height="140"/>
+  <text class="h" x="140" y="1005">6) Secular Variation Synthesis</text>
+  <text class="t" x="140" y="1040">fieldComponents(nmax, gDot, hDot, ...)</text>
+  <text class="t" x="140" y="1070">Obtain derivatives per year</text>
+
+  <path class="line" d="M450 1100 L450 1140" marker-end="url(#arrow)"/>
+
+  <rect class="box" x="110" y="1150" width="680" height="220"/>
+  <text class="h" x="140" y="1195">7) Output</text>
+  <text class="t" x="140" y="1230">MagneticFieldSolution</text>
+  <text class="t" x="140" y="1265">- mainField: X, Y, Z, H, F, D, I</text>
+  <text class="t" x="140" y="1300">- secularVariation: dX, dY, dZ, dH, dF, dD, dI</text>
 </svg>
