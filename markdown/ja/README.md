@@ -6,10 +6,11 @@
 
 🌍 **IGRF や WMM などの国際標準モデルを使用して地球磁場を計算するための強力な Swift ライブラリ**。
 
+📘 **DocC Documentation**: https://rapboygao.github.io/GeoMagSwift/documentation/geomagswift/
 
 ## 🌐 言語
 
-- [English](../en/README.md)
+- [English](../../README.md)
 - [中文](../zh/README.md)
 - [日本語](README.md)
 - [Deutsch](../de/README.md)

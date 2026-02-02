@@ -6,6 +6,8 @@
 
 🌍 **A powerful Swift library for calculating Earth's magnetic field** using international standard models like IGRF and WMM.
 
+📘 **DocC Documentation**: https://rapboygao.github.io/GeoMagSwift/documentation/geomagswift/
+
 ## 🌐 Language
 
 - [English](README.md)

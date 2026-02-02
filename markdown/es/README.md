@@ -6,10 +6,11 @@
 
 🌍 **Una potente biblioteca Swift para calcular el campo magnético terrestre utilizando modelos estándar internacionales como IGRF y WMM**.
 
+📘 **DocC Documentation**: https://rapboygao.github.io/GeoMagSwift/documentation/geomagswift/
 
 ## 🌐 Idioma
 
-- [English](../en/README.md)
+- [English](../../README.md)
 - [中文](../zh/README.md)
 - [日本語](../ja/README.md)
 - [Deutsch](../de/README.md)

@@ -340,6 +340,32 @@ public extension SHCModel {
         return try bestModel(for: year)
     }
 
+    /// 使用最合适的模型计算指定经纬度、海拔和日期的地磁场
+    ///
+    /// Calculate magnetic field for latitude, longitude, altitude and date using the best available model
+    ///
+    /// - Parameters:
+    ///   - latitude: 纬度（度）
+    ///     Latitude (degrees)
+    ///   - longitude: 经度（度）
+    ///     Longitude (degrees)
+    ///   - altitude: 海拔高度（公里）
+    ///     Altitude (km)
+    ///   - date: 日期，默认为当前日期
+    ///     Date, default is current date
+    /// - Returns:
+    ///   地磁场解，包含主磁场和长期变化信息
+    ///   Magnetic field solution, containing main field and secular variation information
+    static func calculate(
+        latitude: Double,
+        longitude: Double,
+        altitude: Double,
+        date: Date = Date()
+    ) throws -> MagneticFieldSolution {
+        let model = try bestModel(for: date)
+        return try model.calculate(latitude: latitude, longitude: longitude, altitude: altitude, year: date)
+    }
+
     /// 球谐系数类型枚举，表示高斯系数的类型
     ///
     /// Spherical harmonic coefficient kind enum, representing the type of Gaussian coefficient
