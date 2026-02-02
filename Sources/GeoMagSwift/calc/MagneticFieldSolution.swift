@@ -32,6 +32,53 @@ public struct MagneticFieldSolution: Sendable, Hashable, Codable {
     /// such as rates for north, east, and down components, as well as derived quantities like
     /// horizontal intensity, total intensity, declination, and inclination rates.
     public let secularVariation: MagneticFieldSecularVariation
+
+    /// 使用已有主磁场和长期变化结果初始化
+    ///
+    /// Initialize with existing main field and secular variation results
+    public init(
+        mainField: MagneticFieldResult,
+        secularVariation: MagneticFieldSecularVariation
+    ) {
+        self.mainField = mainField
+        self.secularVariation = secularVariation
+    }
+
+    /// 根据经纬度、海拔和日期计算并初始化地磁场解
+    ///
+    /// Calculate and initialize magnetic field solution with latitude, longitude, altitude and date
+    ///
+    /// - Parameters:
+    ///   - latitude: 纬度（度）
+    ///     Latitude (degrees)
+    ///   - longitude: 经度（度）
+    ///     Longitude (degrees)
+    ///   - altitude: 海拔高度（公里）
+    ///     Altitude (km)
+    ///   - date: 日期，默认为当前日期
+    ///     Date, default is current date
+    ///   - model: 指定模型；为 nil 时自动选择最合适模型
+    ///     Specific model; if nil, automatically selects the best available model
+    public init(
+        latitude: Double,
+        longitude: Double,
+        altitude: Double,
+        date: Date = Date(),
+        model: SHCModel? = nil
+    ) throws {
+        let selectedModel: SHCModel
+        if let model {
+            selectedModel = model
+        } else {
+            selectedModel = try SHCModel.bestModel(for: date)
+        }
+        self = try selectedModel.calculate(
+            latitude: latitude,
+            longitude: longitude,
+            altitude: altitude,
+            year: date
+        )
+    }
 }
 
 extension MagneticFieldSolution: CustomStringConvertible {
