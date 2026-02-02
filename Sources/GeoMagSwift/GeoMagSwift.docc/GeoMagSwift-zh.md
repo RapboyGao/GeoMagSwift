@@ -1,8 +1,8 @@
-# ``GeoMagSwift``
-
-*English version → <doc:GeoMagSwift>*
+# GeoMagSwift（中文）
 
 GeoMagSwift 提供基于球谐系数（SHC）模型（如 IGRF、WMM）的快速离线地磁场计算。
+
+*English version → <doc:GeoMagSwift>*
 
 ## 概述
 
@@ -10,6 +10,14 @@ GeoMagSwift 提供基于球谐系数（SHC）模型（如 IGRF、WMM）的快速
 - 支持多代模型（IGRF/WMM/WMMHR）。
 - 结果确定、适用于导航、制图与科研。
 - 模型内置后可完全离线运行。
+
+## 运算流程图
+
+![GeoMagSwift 运算流程图](geomag-computation-flow.svg)
+
+## 数学运算流程（详细）
+
+![GeoMagSwift 数学运算流程图](geomag-math-flow.svg)
 
 ## SHCModel 说明（通俗版）
 
@@ -28,10 +36,7 @@ GeoMagSwift 提供基于球谐系数（SHC）模型（如 IGRF、WMM）的快速
 
 ### 1) 磁势函数
 
-```
-V(r, θ, λ) = a * Σ(n=1..N) (a/r)^(n+1) Σ(m=0..n)
-            [ g(n,m) cos(mλ) + h(n,m) sin(mλ) ] P(n,m)(cos θ)
-```
+![磁势方程](equation-potential.svg)
 
 符号含义（尽量直白）：
 
@@ -47,9 +52,7 @@ V(r, θ, λ) = a * Σ(n=1..N) (a/r)^(n+1) Σ(m=0..n)
 
 ### 2) 由磁势得到磁场
 
-```
-B = -∇V
-```
+`B = -∇V`
 
 含义：磁场是磁势的空间变化率（负梯度）。
 
@@ -63,10 +66,7 @@ B = -∇V
 
 假设模型有 2025.0 和 2030.0，而你的时间是 2027.5：
 
-```
-frac = (t - t0) / (t1 - t0)
-value(t) = value(t0) + (value(t1) - value(t0)) * frac
-```
+![插值方程](equation-interpolation.svg)
 
 - `t`：你的十进制年份
 - `t0`, `t1`：左右两边的参考年份
@@ -82,12 +82,7 @@ value(t) = value(t0) + (value(t1) - value(t0)) * frac
 
 ### 第 4 步：得到常用指标
 
-```
-H = sqrt(X^2 + Y^2)          // 水平强度
-F = sqrt(H^2 + Z^2)          // 总强度
-D = atan2(Y, X)              // 磁偏角
-I = atan2(Z, H)              // 磁倾角
-```
+![派生量方程](equation-derived.svg)
 
 直观理解：
 

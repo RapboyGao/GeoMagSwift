@@ -77,6 +77,14 @@ let date = Date()
 // Calcular el campo magnético usando el modelo IGRF14
 let result = try SHCModel.igrf14.calculate(location, date: date)
 
+// Auto-select best model for this date
+let autoResult = try SHCModel.calculate(
+    latitude: location.coordinate.latitude,
+    longitude: location.coordinate.longitude,
+    altitude: location.altitude / 1000.0,
+    date: date
+)
+
 // Acceder a los componentes del campo magnético
 print("Declinación: \(result.mainField.declination)°")
 print("Inclinación: \(result.mainField.inclination)°")
@@ -95,6 +103,7 @@ print("Cambio de declinación: \(result.secularVariation.declination) minutos de
 ```swift
 // Usar el modelo WMM2025
 let wmmResult = try SHCModel.wmm2025.calculate(location, date: date)
+let wmmhrResult = try SHCModel.wmmhr2025.calculate(location, date: date)
 
 // Usar modelos IGRF más antiguos
 let igrf13Result = try SHCModel.igrf13.calculate(location, date: date)
@@ -106,17 +115,18 @@ let igrf12Result = try SHCModel.igrf12.calculate(location, date: date)
 GeoMagSwift incluye los siguientes modelos de campo magnético:
 
 ### IGRF (Campo de Referencia Geomagnético Internacional)
-- **IGRF-14**: Último modelo (2020.0 - 2025.0)
-- **IGRF-13**: Modelo para 2015.0 - 2020.0
-- **IGRF-12**: Modelo para 2010.0 - 2015.0
-- **IGRF-11**: Modelo para 2005.0 - 2010.0
-- **IGRF-10**: Modelo para 2000.0 - 2005.0
+- **IGRF-14**: Latest model (1900.0 - 2030.0)
+- **IGRF-13**: Model for 1900.0 - 2025.0
+- **IGRF-12**: Model for 1900.0 - 2020.0
+- **IGRF-11**: Model for 1900.0 - 2015.0
+- **IGRF-10**: Model for 1900.0 - 2005.0
 
 ### WMM (Modelo Magnético Mundial)
-- **WMM2025**: Último modelo (2025.0 - 2030.0)
-- **WMM2020**: Modelo para 2020.0 - 2025.0
-- **WMM2015**: Modelo para 2015.0 - 2020.0
-- **WMM2010**: Modelo para 2010.0 - 2015.0
+- **WMMHR2025**: High-resolution model for 2025.0 - 2030.0
+- **WMM2025**: Model for 2025.0 - 2030.0
+- **WMM2020**: Model for 2020.0 - 2025.0
+- **WMM2015**: Model for 2015.0 - 2020.0
+- **WMM2010**: Model for 2010.0 - 2015.0
 
 ## 📚 Referencia API
 
@@ -144,17 +154,35 @@ El método `calculate()` devuelve un objeto `MagneticFieldSolution` que contiene
 
 ### SHCModel
 
-La enumeración `SHCModel` proporciona acceso a todos los modelos de campo magnético disponibles:
+La estructura `SHCModel` proporciona acceso a todos los modelos de campo magnético disponibles:
 
 - `igrf14`: Modelo IGRF-14
 - `igrf13`: Modelo IGRF-13
 - `igrf12`: Modelo IGRF-12
 - `igrf11`: Modelo IGRF-11
 - `igrf10`: Modelo IGRF-10
+- `wmmhr2025`: Modelo WMMHR2025
 - `wmm2025`: Modelo WMM2025
 - `wmm2020`: Modelo WMM2020
 - `wmm2015`: Modelo WMM2015
 - `wmm2010`: Modelo WMM2010
+
+
+### Convenience APIs
+
+- `SHCModel.bestModel(for: Date)` and `SHCModel.bestModel(for: Double)` auto-select the best available model for a date/year.
+- `SHCModel.calculate(latitude:longitude:altitude:date:)` calculates directly with automatic model selection.
+- `MagneticFieldSolution(latitude:longitude:altitude:date:model:)` can be initialized directly from coordinates; set `model: nil` (default) for auto-selection, or pass a specific model.
+
+```swift
+let result = try SHCModel.calculate(
+    latitude: 40.0, longitude: 116.0, altitude: 0.0, date: Date()
+)
+
+let result2 = try MagneticFieldSolution(
+    latitude: 40.0, longitude: 116.0, altitude: 0.0, date: Date(), model: nil
+)
+```
 
 ## 💡 Ejemplos
 

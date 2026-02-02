@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="220" viewBox="0 0 1200 220" role="img" aria-labelledby="title desc">
+  <title id="title">Magnetic Potential Equation</title>
+  <desc id="desc">Spherical harmonic representation of magnetic scalar potential V.</desc>
+  <rect x="0" y="0" width="1200" height="220" fill="#ffffff"/>
+  <text x="36" y="70" font-family="Times New Roman, Times, serif" font-size="44" fill="#111827">V(r, θ, λ) = a · Σ</text>
+  <text x="355" y="88" font-family="Times New Roman, Times, serif" font-size="22" fill="#111827">N</text>
+  <text x="352" y="110" font-family="Times New Roman, Times, serif" font-size="20" fill="#111827">n=1</text>
+  <text x="390" y="70" font-family="Times New Roman, Times, serif" font-size="44" fill="#111827">(a/r)</text>
+  <text x="506" y="48" font-family="Times New Roman, Times, serif" font-size="22" fill="#111827">n+1</text>
+  <text x="548" y="70" font-family="Times New Roman, Times, serif" font-size="44" fill="#111827">· Σ</text>
+  <text x="618" y="88" font-family="Times New Roman, Times, serif" font-size="22" fill="#111827">n</text>
+  <text x="612" y="110" font-family="Times New Roman, Times, serif" font-size="20" fill="#111827">m=0</text>
+  <text x="652" y="70" font-family="Times New Roman, Times, serif" font-size="44" fill="#111827">[ gₙₘ cos(mλ) + hₙₘ sin(mλ) ] Pₙₘ(cosθ)</text>
+</svg>

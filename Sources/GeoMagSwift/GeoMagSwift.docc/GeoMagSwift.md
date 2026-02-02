@@ -1,8 +1,8 @@
 # ``GeoMagSwift``
 
-*Looking for Chinese? → <doc:GeoMagSwift-zh>*
-
 GeoMagSwift provides fast, offline geomagnetic field computation based on spherical harmonic coefficient (SHC) models such as IGRF and WMM.
+
+*Looking for Chinese? → <doc:GeoMagSwift-zh>*
 
 ## Overview
 
@@ -10,6 +10,14 @@ GeoMagSwift provides fast, offline geomagnetic field computation based on spheri
 - Support multiple model generations (IGRF/WMM/WMMHR).
 - Deterministic and suitable for navigation, mapping, and scientific analysis.
 - Designed to run without network access once model data is embedded.
+
+## Computation Flow
+
+![GeoMagSwift computation flow diagram](geomag-computation-flow.svg)
+
+## Mathematical Flow (Detailed)
+
+![GeoMagSwift detailed mathematical flow diagram](geomag-math-flow.svg)
 
 ## SHCModel Explained (Plain Language)
 
@@ -30,10 +38,7 @@ We compute a magnetic **potential** first, then take its **gradient** to get the
 
 The model represents a scalar potential `V` around Earth:
 
-```
-V(r, θ, λ) = a * Σ(n=1..N) (a/r)^(n+1) Σ(m=0..n)
-            [ g(n,m) cos(mλ) + h(n,m) sin(mλ) ] P(n,m)(cos θ)
-```
+![Magnetic potential equation](equation-potential.svg)
 
 What the symbols mean (simple explanation):
 
@@ -51,9 +56,7 @@ What the symbols mean (simple explanation):
 
 The magnetic field `B` is the negative gradient of `V`:
 
-```
-B = -∇V
-```
+`B = -∇V`
 
 In plain terms: “take the spatial rate of change of the potential.” The library does this internally.
 
@@ -67,10 +70,7 @@ A date like 2025-07-01 becomes a number like `2025.5`. This makes interpolation 
 
 If the model has data for 2025.0 and 2030.0, and your date is 2027.5, we blend values linearly:
 
-```
-frac = (t - t0) / (t1 - t0)
-value(t) = value(t0) + (value(t1) - value(t0)) * frac
-```
+![Interpolation equations](equation-interpolation.svg)
 
 - `t`: your decimal year
 - `t0`, `t1`: surrounding epochs
@@ -88,12 +88,7 @@ Using the interpolated coefficients, we evaluate the spherical harmonics to obta
 
 From `X, Y, Z`, we compute the values people commonly use:
 
-```
-H = sqrt(X^2 + Y^2)          // horizontal intensity
-F = sqrt(H^2 + Z^2)          // total intensity
-D = atan2(Y, X)              // declination
-I = atan2(Z, H)              // inclination
-```
+![Derived magnetic quantities equations](equation-derived.svg)
 
 Plain meaning:
 

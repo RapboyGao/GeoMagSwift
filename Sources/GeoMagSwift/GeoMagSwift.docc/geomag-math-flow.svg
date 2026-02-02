@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">GeoMagSwift Mathematical Computation Flow</title>
+  <desc id="desc">Detailed mathematical flow from decimal year interpolation of Gauss coefficients to potential, gradient, field components, derived quantities, and secular variation propagation.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .box { fill: #ffffff; stroke: #0f172a; stroke-width: 2; rx: 12; ry: 12; }
+      .em { fill: #ecfeff; stroke: #0e7490; stroke-width: 2; rx: 12; ry: 12; }
+      .title { font: 700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .h { font: 700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .t { font: 500 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1e293b; }
+      .m { font: 500 15px Menlo, Monaco, Consolas, "Liberation Mono", monospace; fill: #111827; }
+      .line { stroke: #0f172a; stroke-width: 2.4; fill: none; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="760" />
+  <text class="title" x="34" y="42">GeoMagSwift Detailed Mathematical Flow</text>
+
+  <rect class="box" x="30" y="80" width="300" height="130" />
+  <text class="h" x="50" y="112">1) Date -> Decimal Year</text>
+  <text class="t" x="50" y="140">Input: date, latitude, longitude, altitude</text>
+  <text class="m" x="50" y="170">t = decimalYear(date)</text>
+
+  <rect class="box" x="370" y="80" width="320" height="170" />
+  <text class="h" x="390" y="112">2) Epoch Bracketing + Interpolation</text>
+  <text class="m" x="390" y="142">frac = (t - t0) / (t1 - t0)</text>
+  <text class="m" x="390" y="170">g(t) = g0 + (g1 - g0) * frac</text>
+  <text class="m" x="390" y="198">h(t) = h0 + (h1 - h0) * frac</text>
+  <text class="m" x="390" y="226">gDot = (g1 - g0) / (t1 - t0)</text>
+
+  <rect class="box" x="740" y="80" width="620" height="170" />
+  <text class="h" x="760" y="112">3) Magnetic Scalar Potential (Spherical Harmonics)</text>
+  <text class="m" x="760" y="146">V(r, theta, lambda) = a * Sum(n=1..N) (a/r)^(n+1) Sum(m=0..n)</text>
+  <text class="m" x="760" y="172">  [ g(n,m) cos(m lambda) + h(n,m) sin(m lambda) ] P(n,m)(cos(theta))</text>
+  <text class="t" x="760" y="206">Use interpolated g/h at time t</text>
+
+  <rect class="em" x="170" y="310" width="360" height="150" />
+  <text class="h" x="190" y="342">4) Main Field Components</text>
+  <text class="m" x="190" y="372">B = -grad(V)</text>
+  <text class="m" x="190" y="400">X = North, Y = East, Z = Down</text>
+  <text class="t" x="190" y="430">Computed via fieldComponents(nmax, g, h, ...)</text>
+
+  <rect class="em" x="560" y="310" width="380" height="150" />
+  <text class="h" x="580" y="342">5) Derived Quantities</text>
+  <text class="m" x="580" y="372">H = sqrt(X^2 + Y^2)</text>
+  <text class="m" x="580" y="398">F = sqrt(H^2 + Z^2)</text>
+  <text class="m" x="580" y="424">D = atan2(Y, X), I = atan2(Z, H)</text>
+
+  <rect class="box" x="980" y="310" width="380" height="170" />
+  <text class="h" x="1000" y="342">6) Secular Variation (Per Year)</text>
+  <text class="t" x="1000" y="370">Repeat harmonics with gDot/hDot:</text>
+  <text class="m" x="1000" y="398">dX, dY, dZ = fieldComponents(..., gDot, hDot)</text>
+  <text class="t" x="1000" y="428">Propagate to dH, dF, dD, dI</text>
+
+  <rect class="box" x="450" y="540" width="500" height="170" />
+  <text class="h" x="470" y="572">7) Final Result Object</text>
+  <text class="m" x="470" y="604">MagneticFieldSolution {</text>
+  <text class="m" x="470" y="630">  mainField: (X, Y, Z, H, F, D, I),</text>
+  <text class="m" x="470" y="656">  secularVariation: (dX, dY, dZ, dH, dF, dD, dI)</text>
+  <text class="m" x="470" y="682">}</text>
+
+  <path class="line" d="M330 145 L370 145" marker-end="url(#arrow)" />
+  <path class="line" d="M690 165 L740 165" marker-end="url(#arrow)" />
+  <path class="line" d="M1050 250 L1050 290 L350 290 L350 310" marker-end="url(#arrow)" />
+  <path class="line" d="M530 385 L560 385" marker-end="url(#arrow)" />
+  <path class="line" d="M940 385 L980 385" marker-end="url(#arrow)" />
+  <path class="line" d="M1170 480 L1170 520 L700 520 L700 540" marker-end="url(#arrow)" />
+</svg>

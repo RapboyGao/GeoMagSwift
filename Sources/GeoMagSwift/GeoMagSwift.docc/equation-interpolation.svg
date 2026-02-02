@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="220" viewBox="0 0 1200 220" role="img" aria-labelledby="title desc">
+  <title id="title">Interpolation Equations</title>
+  <desc id="desc">Linear interpolation formulas used between model epochs.</desc>
+  <rect x="0" y="0" width="1200" height="220" fill="#ffffff"/>
+  <text x="40" y="72" font-family="Times New Roman, Times, serif" font-size="44" fill="#111827">frac = (t − t₀) / (t₁ − t₀)</text>
+  <text x="40" y="138" font-family="Times New Roman, Times, serif" font-size="44" fill="#111827">value(t) = value(t₀) + (value(t₁) − value(t₀)) · frac</text>
+</svg>

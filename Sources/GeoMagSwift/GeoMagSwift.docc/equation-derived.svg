@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="260" viewBox="0 0 1200 260" role="img" aria-labelledby="title desc">
+  <title id="title">Derived Field Quantities</title>
+  <desc id="desc">Equations for horizontal intensity, total intensity, declination and inclination.</desc>
+  <rect x="0" y="0" width="1200" height="260" fill="#ffffff"/>
+  <text x="40" y="70" font-family="Times New Roman, Times, serif" font-size="42" fill="#111827">H = √(X² + Y²)</text>
+  <text x="40" y="124" font-family="Times New Roman, Times, serif" font-size="42" fill="#111827">F = √(H² + Z²)</text>
+  <text x="40" y="178" font-family="Times New Roman, Times, serif" font-size="42" fill="#111827">D = atan2(Y, X)</text>
+  <text x="40" y="232" font-family="Times New Roman, Times, serif" font-size="42" fill="#111827">I = atan2(Z, H)</text>
+</svg>
