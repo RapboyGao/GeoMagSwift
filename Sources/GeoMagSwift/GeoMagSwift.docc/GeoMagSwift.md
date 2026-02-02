@@ -11,6 +11,10 @@ GeoMagSwift provides fast, offline geomagnetic field computation based on spheri
 - Deterministic and suitable for navigation, mapping, and scientific analysis.
 - Designed to run without network access once model data is embedded.
 
+## Repository
+
+- GitHub: [RapboyGao/GeoMagSwift](https://github.com/RapboyGao/GeoMagSwift)
+
 ## Computation Flow
 
 ![GeoMagSwift computation flow diagram](geomag-computation-flow.svg)

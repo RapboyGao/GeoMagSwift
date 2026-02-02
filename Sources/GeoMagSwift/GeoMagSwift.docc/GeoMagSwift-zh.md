@@ -11,6 +11,10 @@ GeoMagSwift 提供基于球谐系数（SHC）模型（如 IGRF、WMM）的快速
 - 结果确定、适用于导航、制图与科研。
 - 模型内置后可完全离线运行。
 
+## 仓库地址
+
+- GitHub: [RapboyGao/GeoMagSwift](https://github.com/RapboyGao/GeoMagSwift)
+
 ## 运算流程图
 
 ![GeoMagSwift 运算流程图](geomag-computation-flow.svg)
