@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal, getcontext
 from io import BytesIO
+import json
 from pathlib import Path
 import re
 import ssl
@@ -31,6 +32,7 @@ class WMMDoc:
 
 ROOT = Path(__file__).resolve().parent
 OUT_DIR = ROOT / "Sources" / "GeoMagSwift" / "models"
+RES_DIR = ROOT / "Sources" / "GeoMagSwift" / "Resources"
 
 DEFAULT_CONTEXT = None
 URL_CONTEXT = None
@@ -142,20 +144,6 @@ def _swift_string(value: str) -> str:
     )
 
 
-def _format_double_array(tokens: list[str], indent: str) -> str:
-    if not tokens:
-        return f"{indent}[]"
-    per_line = 8
-    lines: list[str] = [f"{indent}["]
-    for i in range(0, len(tokens), per_line):
-        chunk = ", ".join(tokens[i : i + per_line])
-        if i + per_line < len(tokens):
-            chunk += ","
-        lines.append(f"{indent}    {chunk}")
-    lines.append(f"{indent}]")
-    return "\n".join(lines)
-
-
 def _model_name(version: int) -> str:
     return f"wmm{version}"
 
@@ -190,39 +178,41 @@ def _write_model_file(doc: WMMDoc, version: int) -> None:
     lines.append("    ///")
     lines.append(f"    /// 有效 epoch: {epoch_str} - {epoch_next}")
     lines.append(f"    /// Valid epochs: {epoch_str} - {epoch_next}")
-    lines.append(f"    static let {model_name} = SHCModel(")
-    lines.append(f"        fileName: \"{_swift_string(doc.file_name)}\",")
-    lines.append("        headers: [")
-    lines.append(f"            \"{_swift_string(doc.header)}\",")
-    lines.append("        ],")
-    lines.append("        headerNumbers: [],")
-    lines.append(
-        "        epochs: " + _format_double_array([epoch_str, epoch_next], "        ") + ","
-    )
-    lines.append("        coefficients: [")
-    for row in doc.coefficients:
-        lines.append("            Coefficient(")
-        lines.append(f"                n: {row.n},")
-        lines.append(f"                m: {row.m},")
-        lines.append(f"                kind: .{row.kind},")
-        lines.append(
-            "                values: "
-            + _format_double_array(row.values, "                ")
-        )
-        lines.append("            ),")
-    lines.append("        ],")
-    lines.append(f"        validFrom: {epoch_str},")
-    lines.append(f"        validTo: {epoch_next}")
-    lines.append("    )")
+    lines.append(f"    static let {model_name}: SHCModel = try! SHCModel.loadResource(\"{model_name}\")")
     lines.append("}")
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
+    payload = {
+        "fileName": doc.file_name,
+        "headers": [doc.header],
+        "headerNumbers": [],
+        "epochs": [float(doc.epoch), float(doc.epoch + Decimal(5))],
+        "validFrom": float(doc.epoch),
+        "validTo": float(doc.epoch + Decimal(5)),
+        "coefficients": [
+            {
+                "n": row.n,
+                "m": row.m,
+                "kind": row.kind,
+                "values": [float(value) for value in row.values],
+            }
+            for row in doc.coefficients
+        ],
+    }
+    resource_path = RES_DIR / f"{model_name}.json"
+    resource_path.write_text(
+        json.dumps(payload, separators=(",", ":"), allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
 
 def _clean_output() -> None:
-    if not OUT_DIR.exists():
-        return
-    for path in OUT_DIR.glob("SHCModel+wmm\d+.swift"):
-        path.unlink()
+    if OUT_DIR.exists():
+        for path in OUT_DIR.glob("SHCModel+wmm[0-9]*.swift"):
+            path.unlink()
+    if RES_DIR.exists():
+        for path in RES_DIR.glob("wmm[0-9]*.json"):
+            path.unlink()
 
 
 def _extract_cof(bytes_data: bytes, url: str) -> tuple[str, str]:
@@ -308,6 +298,7 @@ def main() -> None:
         raise SystemExit("No WMM models found in the requested range.")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    RES_DIR.mkdir(parents=True, exist_ok=True)
     _clean_output()
     for version, doc in docs:
         _write_model_file(doc, version)

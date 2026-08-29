@@ -20,5 +20,5 @@ public extension SHCModel {
     ///
     /// 有效 epoch: 2025 - 2030
     /// Valid epochs: 2025 - 2030
-    static let wmmhr2025: SHCModel = SHCModel.loadResource("wmmhr2025")
+    static let wmmhr2025: SHCModel = SHCModel.requiredResource("wmmhr2025")
 }

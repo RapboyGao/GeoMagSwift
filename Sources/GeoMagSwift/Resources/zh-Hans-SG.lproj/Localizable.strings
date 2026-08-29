@@ -12,3 +12,14 @@
 "magnetic_field_solution_unit_nt_per_year" = "nT/年";
 "magnetic_field_solution_unit_degree" = "°";
 "magnetic_field_solution_unit_arcmin_per_year" = "角分/年";
+"geomagnetic_map_title" = "地磁场地图";
+"geomagnetic_map_long_press_instruction" = "长按地图选择位置";
+"geomagnetic_map_model" = "模型";
+"geomagnetic_map_date" = "日期";
+"geomagnetic_map_altitude" = "海拔";
+"geomagnetic_map_selected_location" = "选中位置";
+"geomagnetic_map_main_field" = "主磁场";
+"geomagnetic_map_secular_variation" = "长期变化";
+"geomagnetic_map_latitude" = "纬度";
+"geomagnetic_map_longitude" = "经度";
+"geomagnetic_map_calculation_error" = "计算错误";

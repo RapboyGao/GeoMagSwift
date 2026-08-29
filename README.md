@@ -110,6 +110,24 @@ let igrf13Result = try SHCModel.igrf13.calculate(location, date: date)
 let igrf12Result = try SHCModel.igrf12.calculate(location, date: date)
 ```
 
+### SwiftUI Map Picker
+
+`GeomagneticMapView` provides an iOS/iPadOS 16+ map for long-press location selection and automatic magnetic-field calculation. It includes model, date, and altitude controls, and supports Mac Catalyst 16+.
+
+```swift
+import GeoMagSwift
+import SwiftUI
+
+@available(iOS 16.0, macCatalyst 16.0, *)
+struct ContentView: View {
+    var body: some View {
+        GeomagneticMapView()
+    }
+}
+```
+
+The view uses `MKMapView` internally for iOS 16 compatibility and does not request location permission. Long press the map to select a point.
+
 ## 📊 Models
 
 GeoMagSwift includes the following magnetic field models:
@@ -242,4 +260,3 @@ GeoMagSwift is available under the MIT license. See the [LICENSE](LICENSE) file 
 ---
 
 **Made with ❤️ for Earth Science and Navigation**
-

@@ -16,6 +16,10 @@ import Foundation
 /// The model implements the Codable protocol for serialization and deserialization,
 /// and the Identifiable protocol for easy use in SwiftUI.
 public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
+    /// Upper bound for model degree to prevent oversized calculation matrices.
+    /// 模型阶数上限，用于防止分配过大的计算矩阵。
+    private static let maximumSupportedNmax = 720
+
     /// 模型文件名，用于唯一标识模型
     ///
     /// Model file name, used to uniquely identify the model
@@ -116,6 +120,27 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
         case invalidEpochs
     }
 
+    /// 由于模型数据或计算输入无效而产生的错误。
+    ///
+    /// Errors caused by invalid model data or calculation inputs.
+    public enum ValidationError: Error, Sendable, Hashable {
+        /// 计算输入不是有限值，或超出物理范围。
+        /// A calculation input is not finite or outside its physical range.
+        case invalidInput(parameter: String)
+        /// 模型阶数超出支持的资源和内存限制。
+        /// The model degree is outside the supported resource and memory limit.
+        case invalidNmax(value: Int, maximum: Int)
+        /// 系数包含无效的球谐索引。
+        /// A coefficient has an invalid spherical-harmonic index.
+        case invalidCoefficientIndex(n: Int, m: Int)
+        /// 系数没有足够的有限值用于插值。
+        /// A coefficient does not contain enough finite values for interpolation.
+        case invalidCoefficientValues(n: Int, m: Int)
+        /// 模型有效期不是有限值，或起止顺序无效。
+        /// The model validity range is not finite or ordered.
+        case invalidValidityRange
+    }
+
     /// 计算指定位置和日期的地磁场
     ///
     /// Calculate magnetic field at specified location and date
@@ -154,7 +179,9 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
     /// - Returns:
     ///   地磁场解，包含主磁场和长期变化信息
     ///   Magnetic field solution, containing main field and secular variation information
-    public func calculate(latitude: Double, longitude: Double, altitude: Double, year: Date) throws -> MagneticFieldSolution {
+    public func calculate(latitude: Double, longitude: Double, altitude: Double, year: Date) throws
+        -> MagneticFieldSolution
+    {
         let year = DateUtils.decimalYear(from: year)
         return try calculate(
             latitude: latitude, longitude: longitude,
@@ -183,6 +210,10 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
         altitude: Double,
         year: Double
     ) throws -> MagneticFieldSolution {
+        // Validate all external inputs and model metadata before allocating workspaces.
+        // 在分配计算工作区前，先校验所有外部输入和模型元数据。
+        try validateInputs(latitude: latitude, longitude: longitude, altitude: altitude, year: year)
+        try validateModel()
         try validateYear(year)
         let (g, h, gDot, hDot) = coefficients(for: year)
         var workspace = SphericalHarmonics.Workspace(nmax: nmax)
@@ -191,7 +222,8 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
         let mainField = MagneticFieldResult(north: main.north, east: main.east, down: main.down)
 
         let secular = SphericalHarmonics.fieldComponents(
-            nmax: nmax, g: gDot, h: hDot, latitude: latitude, longitude: longitude, altitude: altitude, workspace: &workspace)
+            nmax: nmax, g: gDot, h: hDot, latitude: latitude, longitude: longitude, altitude: altitude,
+            workspace: &workspace)
         let sec = MagneticFieldSecularVariation(mainField: mainField, derivative: secular)
 
         return MagneticFieldSolution(mainField: mainField, secularVariation: sec)
@@ -213,6 +245,61 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
         let range = validFrom...validTo
         guard range.contains(year) else {
             throw SHCModelError.yearOutOfRange(year: year, validRange: range)
+        }
+    }
+
+    /// 校验输入，避免无效数值进入数值计算流程。
+    ///
+    /// Validate user inputs before entering numerical routines.
+    private func validateInputs(latitude: Double, longitude: Double, altitude: Double, year: Double) throws {
+        guard latitude.isFinite, (-90.0...90.0).contains(latitude) else {
+            throw ValidationError.invalidInput(parameter: "latitude")
+        }
+        guard longitude.isFinite, (-180.0...180.0).contains(longitude) else {
+            throw ValidationError.invalidInput(parameter: "longitude")
+        }
+        guard altitude.isFinite, altitude > -Geodesy.wgs84B else {
+            throw ValidationError.invalidInput(parameter: "altitude")
+        }
+        guard year.isFinite else {
+            throw ValidationError.invalidInput(parameter: "year")
+        }
+    }
+
+    /// 在分配计算矩阵前校验模型数据，避免越界和异常内存消耗。
+    ///
+    /// Validate model data before allocating calculation matrices.
+    private func validateModel() throws {
+        guard nmax >= 1, nmax <= Self.maximumSupportedNmax else {
+            throw ValidationError.invalidNmax(value: nmax, maximum: Self.maximumSupportedNmax)
+        }
+
+        guard validFrom.isFinite, validTo.isFinite, validFrom <= validTo else {
+            throw ValidationError.invalidValidityRange
+        }
+
+        for index in epochs.indices {
+            guard epochs[index].isFinite else {
+                throw ValidationError.invalidValidityRange
+            }
+            if index > 0, epochs[index - 1] >= epochs[index] {
+                throw ValidationError.invalidValidityRange
+            }
+        }
+
+        for coefficient in coefficients {
+            guard coefficient.n >= 1,
+                coefficient.n <= nmax,
+                coefficient.m >= 0,
+                coefficient.m <= coefficient.n
+            else {
+                throw ValidationError.invalidCoefficientIndex(n: coefficient.n, m: coefficient.m)
+            }
+            guard coefficient.values.count >= 2,
+                coefficient.values.allSatisfy(\.isFinite)
+            else {
+                throw ValidationError.invalidCoefficientValues(n: coefficient.n, m: coefficient.m)
+            }
         }
     }
 
@@ -245,6 +332,9 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
 
         for coeff in gCoefficients {
             guard coeff.values.count > index + 1 else { continue }
+            // Keep a second bounds check at the matrix write site for defense in depth.
+            // 在矩阵写入位置保留第二层边界检查，形成纵深防御。
+            guard coeff.n >= 0, coeff.n < size, coeff.m >= 0, coeff.m < size else { continue }
             let v0 = coeff.values[index]
             let v1 = coeff.values[index + 1]
             let value = v0 + (v1 - v0) * fraction
@@ -255,6 +345,9 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
 
         for coeff in hCoefficients {
             guard coeff.values.count > index + 1 else { continue }
+            // Keep a second bounds check at the matrix write site for defense in depth.
+            // 在矩阵写入位置保留第二层边界检查，形成纵深防御。
+            guard coeff.n >= 0, coeff.n < size, coeff.m >= 0, coeff.m < size else { continue }
             let v0 = coeff.values[index]
             let v1 = coeff.values[index + 1]
             let value = v0 + (v1 - v0) * fraction
@@ -302,7 +395,6 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
         let fraction = t1 == t0 ? 0.0 : (year - t0) / (t1 - t0)
         return (index, fraction)
     }
-
 
 }
 

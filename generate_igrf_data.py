@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal, getcontext
+import json
 from pathlib import Path
 import re
 import ssl
@@ -32,6 +33,7 @@ class IGRFDoc:
 
 ROOT = Path(__file__).resolve().parent
 OUT_DIR = ROOT / "Sources" / "GeoMagSwift" / "models"
+RES_DIR = ROOT / "Sources" / "GeoMagSwift" / "Resources"
 
 DEFAULT_CONTEXT = None
 URL_CONTEXT = None
@@ -180,20 +182,6 @@ def _swift_string(value: str) -> str:
     )
 
 
-def _format_double_array(tokens: list[str], indent: str) -> str:
-    if not tokens:
-        return f"{indent}[]"
-    per_line = 8
-    lines: list[str] = [f"{indent}["]
-    for i in range(0, len(tokens), per_line):
-        chunk = ", ".join(tokens[i : i + per_line])
-        if i + per_line < len(tokens):
-            chunk += ","
-        lines.append(f"{indent}    {chunk}")
-    lines.append(f"{indent}]")
-    return "\n".join(lines)
-
-
 def _model_name(doc: IGRFDoc) -> str:
     match = re.search(r"(\d+)", doc.file_name)
     suffix = match.group(1) if match else doc.file_name
@@ -238,52 +226,46 @@ def _write_model_file(doc: IGRFDoc) -> None:
         else:
             lines.append(f"    /// 有效 epoch: {epochs_str}")
             lines.append(f"    /// Valid epochs: {epochs_str}")
-    lines.append(f"    static let {model_name} = SHCModel(")
-    lines.append(f"        fileName: \"{_swift_string(doc.file_name)}\",")
-    if doc.headers:
-        lines.append("        headers: [")
-        for header in doc.headers:
-            lines.append(f"            \"{_swift_string(header)}\",")
-        lines.append("        ],")
-    else:
-        lines.append("        headers: [],")
-    lines.append(
-        "        headerNumbers: "
-        + _format_double_array(doc.header_numbers, "        ")
-        + ","
-    )
-    lines.append(
-        "        epochs: " + _format_double_array(doc.epochs, "        ") + ","
-    )
-    lines.append("        coefficients: [")
-    for row in doc.coefficients:
-        lines.append("            Coefficient(")
-        lines.append(f"                n: {row.n},")
-        lines.append(f"                m: {row.m},")
-        lines.append(f"                kind: .{row.kind},")
-        lines.append(
-            "                values: "
-            + _format_double_array(row.values, "                ")
-        )
-        lines.append("            ),")
-    lines.append("        ],")
-    if doc.epochs:
-        lines.append(f"        validFrom: {doc.epochs[0]},")
-        lines.append(f"        validTo: {doc.epochs[-1]}")
-    lines.append("    )")
+    lines.append(f"    static let {model_name}: SHCModel = try! SHCModel.loadResource(\"{model_name}\")")
     lines.append("}")
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
+    payload = {
+        "fileName": doc.file_name,
+        "headers": doc.headers,
+        "headerNumbers": [float(value) for value in doc.header_numbers],
+        "epochs": [float(value) for value in doc.epochs],
+        "validFrom": float(doc.epochs[0]) if doc.epochs else None,
+        "validTo": float(doc.epochs[-1]) if doc.epochs else None,
+        "coefficients": [
+            {
+                "n": row.n,
+                "m": row.m,
+                "kind": row.kind,
+                "values": [float(value) for value in row.values],
+            }
+            for row in doc.coefficients
+        ],
+    }
+    resource_path = RES_DIR / f"{model_name}.json"
+    resource_path.write_text(
+        json.dumps(payload, separators=(",", ":"), allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
 
 def _clean_output() -> None:
-    if not OUT_DIR.exists():
-        return
-    for path in OUT_DIR.glob("SHCModel+igrf*.swift"):
-        path.unlink()
+    if OUT_DIR.exists():
+        for path in OUT_DIR.glob("SHCModel+igrf*.swift"):
+            path.unlink()
+    if RES_DIR.exists():
+        for path in RES_DIR.glob("igrf*.json"):
+            path.unlink()
 
 
 def _write_swift(docs: list[IGRFDoc]) -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    RES_DIR.mkdir(parents=True, exist_ok=True)
     _clean_output()
     for doc in docs:
         _write_model_file(doc)

@@ -176,7 +176,7 @@ def _write_model_file(doc: WMMHRDoc, version: int) -> None:
     lines.append("    ///")
     lines.append(f"    /// 有效 epoch: {_decimal_to_str(doc.epoch)} - {_decimal_to_str(doc.epoch + Decimal(5))}")
     lines.append(f"    /// Valid epochs: {_decimal_to_str(doc.epoch)} - {_decimal_to_str(doc.epoch + Decimal(5))}")
-    lines.append(f"    static let {model_name}: SHCModel = SHCModel.loadResource(\"{model_name}\")")
+    lines.append(f"    static let {model_name}: SHCModel = try! SHCModel.loadResource(\"{model_name}\")")
     lines.append("}")
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -201,7 +201,10 @@ def _write_model_file(doc: WMMHRDoc, version: int) -> None:
             for row in doc.coefficients
         ],
     }
-    resource_path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8", newline="\n")
+    resource_path.write_text(
+        json.dumps(payload, separators=(",", ":"), allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
 
 def _clean_output() -> None:
     if not OUT_DIR.exists():

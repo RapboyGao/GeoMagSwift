@@ -12,3 +12,14 @@
 "magnetic_field_solution_unit_nt_per_year" = "nT/वर्ष";
 "magnetic_field_solution_unit_degree" = "°";
 "magnetic_field_solution_unit_arcmin_per_year" = "चाप मिनट/वर्ष";
+"geomagnetic_map_title" = "Geomagnetic Field Map";
+"geomagnetic_map_long_press_instruction" = "Long press the map to select a location";
+"geomagnetic_map_model" = "Model";
+"geomagnetic_map_date" = "Date";
+"geomagnetic_map_altitude" = "Altitude";
+"geomagnetic_map_selected_location" = "Selected Location";
+"geomagnetic_map_main_field" = "Main Field";
+"geomagnetic_map_secular_variation" = "Secular Variation";
+"geomagnetic_map_latitude" = "Latitude";
+"geomagnetic_map_longitude" = "Longitude";
+"geomagnetic_map_calculation_error" = "Calculation Error";

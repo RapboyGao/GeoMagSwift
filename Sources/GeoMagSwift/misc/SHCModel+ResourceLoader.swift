@@ -4,6 +4,26 @@ import Foundation
 ///
 /// SHCModel resource loading extension
 public extension SHCModel {
+    /// Errors that can occur while loading a bundled JSON model resource.
+    /// 加载内置 JSON 地磁模型资源时可能发生的错误。
+    enum ResourceError: Error, Sendable, Hashable {
+        /// The resource name contains characters outside the model identifier format.
+        /// 资源名称包含模型标识符格式之外的字符。
+        case invalidResourceName(name: String)
+        /// The requested resource does not exist in the module bundle.
+        /// 请求的资源不存在于模块 Bundle 中。
+        case resourceNotFound(name: String)
+        /// The resource is larger than the supported limit.
+        /// 资源大小超过允许的上限。
+        case resourceTooLarge(name: String, byteCount: Int, maximum: Int)
+        /// The resource could not be read from the module bundle.
+        /// 无法从模块 Bundle 中读取资源。
+        case resourceReadFailed(name: String, reason: String)
+        /// The resource was read but could not be decoded as an SHCModel.
+        /// 资源读取成功，但无法解码为 SHCModel。
+        case resourceDecodeFailed(name: String, reason: String)
+    }
+
     /// 从资源文件加载 SHCModel
     ///
     /// Load SHCModel from resource file
@@ -12,18 +32,64 @@ public extension SHCModel {
     ///   Resource file name (without extension)
     /// - Returns: 加载的 SHCModel 对象
     ///   Loaded SHCModel object
-    static func loadResource(_ name: String) -> SHCModel {
-        var model = SHCModel(fileName: "", headers: [], headerNumbers: [], epochs: [], coefficients: [])
+    static func loadResource(_ name: String) throws -> SHCModel {
+        // Restrict resource identifiers to prevent path traversal and unexpected bundle lookups.
+        // 限制资源标识符格式，防止路径穿越和非预期的 Bundle 查找。
+        let isValidName =
+            !name.isEmpty
+            && name.unicodeScalars.allSatisfy { scalar in
+                (scalar.value >= 48 && scalar.value <= 57)
+                    || (scalar.value >= 65 && scalar.value <= 90)
+                    || (scalar.value >= 97 && scalar.value <= 122)
+                    || scalar.value == 45
+                    || scalar.value == 95
+            }
+        guard isValidName else {
+            throw ResourceError.invalidResourceName(name: name)
+        }
+
         guard let url = Bundle.module.url(forResource: name, withExtension: "json") else {
-            return model
+            throw ResourceError.resourceNotFound(name: name)
         }
+
+        // Bound the amount of data that can be read before JSON decoding allocates model storage.
+        // 在 JSON 解码分配模型存储前限制可读取的数据量。
+        let maximumResourceSize = 16 * 1024 * 1024
+        if let resourceValues = try? url.resourceValues(forKeys: [.fileSizeKey]),
+            let byteCount = resourceValues.fileSize,
+            byteCount > maximumResourceSize
+        {
+            throw ResourceError.resourceTooLarge(
+                name: name, byteCount: byteCount, maximum: maximumResourceSize)
+        }
+
+        let data: Data
         do {
-            let data = try Data(contentsOf: url)
-            model = try JSONDecoder().decode(SHCModel.self, from: data)
+            data = try Data(contentsOf: url)
         } catch {
-            return model
+            throw ResourceError.resourceReadFailed(name: name, reason: String(reflecting: error))
         }
-        return model
+
+        do {
+            return try JSONDecoder().decode(SHCModel.self, from: data)
+        } catch {
+            throw ResourceError.resourceDecodeFailed(name: name, reason: String(reflecting: error))
+        }
+    }
+
+    /// 加载内置静态模型属性所必需的 Bundle 模型。
+    ///
+    /// Load a bundled model required by a built-in static model property.
+    ///
+    /// A missing or invalid built-in resource is a packaging error and cannot be
+    /// recovered from while preserving the existing static-property API.
+    /// 内置资源缺失或损坏属于打包错误；为了保留现有静态属性 API，无法在运行时恢复。
+    static func requiredResource(_ name: String) -> SHCModel {
+        do {
+            return try loadResource(name)
+        } catch {
+            preconditionFailure("Unable to load required geomagnetic model '\(name)': \(error)")
+        }
     }
 
     /// 编码键枚举

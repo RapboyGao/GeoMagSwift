@@ -110,6 +110,24 @@ let igrf13Result = try SHCModel.igrf13.calculate(location, date: date)
 let igrf12Result = try SHCModel.igrf12.calculate(location, date: date)
 ```
 
+### SwiftUI 地图选点
+
+`GeomagneticMapView` 提供 iOS/iPadOS 16+ 地图，可通过长按选择位置并自动计算磁场信息。视图内置模型、日期和海拔控件，同时支持 Mac Catalyst 16+。
+
+```swift
+import GeoMagSwift
+import SwiftUI
+
+@available(iOS 16.0, macCatalyst 16.0, *)
+struct ContentView: View {
+    var body: some View {
+        GeomagneticMapView()
+    }
+}
+```
+
+该视图内部使用 `MKMapView` 以兼容 iOS 16，不会申请用户定位权限。长按地图即可选择位置。
+
 ## 📊 模型
 
 GeoMagSwift 包含以下磁场模型：
@@ -242,4 +260,3 @@ GeoMagSwift 在 MIT 许可证下可用。有关更多信息，请参阅 [LICENSE
 ---
 
 **用 ❤️ 为地球科学和导航而制作**
-

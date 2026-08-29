@@ -4,14 +4,35 @@ import Foundation
 ///
 /// Legendre polynomial calculation utilities
 internal enum Legendre {
+    /// 用显式锁保护归一化因子缓存，确保并发首次计算安全。
+    ///
+    /// Protects normalization-factor caching with an explicit lock so concurrent
+    /// first-time calculations remain race-free.
+    /// Thread-safe storage for normalization factors.
+    private final class NormalizationCache: @unchecked Sendable {
+        private let lock = NSLock()
+        private var values: [Int: [[Double]]] = [:]
+
+        func value(for nmax: Int, makeValue: () -> [[Double]]) -> [[Double]] {
+            // Hold the lock through creation to prevent duplicate writes and races.
+            // 创建缓存值期间保持锁，避免重复写入和数据竞争。
+            lock.lock()
+            defer { lock.unlock() }
+
+            if let cached = values[nmax] {
+                return cached
+            }
+
+            let value = makeValue()
+            values[nmax] = value
+            return value
+        }
+    }
+
     /// 归一化因子缓存
     ///
     /// Normalization factors cache
-    nonisolated(unsafe) private static var normalizationCache: [Int: [[Double]]] = [:]
-    /// 缓存锁
-    ///
-    /// Cache lock
-    private static let cacheLock = NSLock()
+    private static let normalizationCache = NormalizationCache()
 
     /// 计算施密特归一化的勒让德多项式及其导数
     ///
@@ -56,7 +77,8 @@ internal enum Legendre {
                 for n in (m + 2)...nmax {
                     let nVal = nDouble[n]
                     let mVal = mDouble[m]
-                    let numerator = (2.0 * nVal - 1.0) * cosTheta * p[n - 1][m]
+                    let numerator =
+                        (2.0 * nVal - 1.0) * cosTheta * p[n - 1][m]
                         - (nVal + mVal - 1.0) * p[n - 2][m]
                     p[n][m] = numerator / (nVal - mVal)
                 }
@@ -95,25 +117,16 @@ internal enum Legendre {
     ///   归一化因子矩阵
     ///   Normalization factors matrix
     private static func normalizationFactors(nmax: Int) -> [[Double]] {
-        cacheLock.lock()
-        if let cached = normalizationCache[nmax] {
-            cacheLock.unlock()
-            return cached
-        }
-        cacheLock.unlock()
-
-        let factorials = computeFactorials(upTo: 2 * nmax)
-        var factors = Array(repeating: Array(repeating: 0.0, count: nmax + 1), count: nmax + 1)
-        for n in 0...nmax {
-            for m in 0...n {
-                factors[n][m] = schmidtNormalization(n: n, m: m, factorials: factorials)
+        normalizationCache.value(for: nmax) {
+            let factorials = computeFactorials(upTo: 2 * nmax)
+            var factors = Array(repeating: Array(repeating: 0.0, count: nmax + 1), count: nmax + 1)
+            for n in 0...nmax {
+                for m in 0...n {
+                    factors[n][m] = schmidtNormalization(n: n, m: m, factorials: factorials)
+                }
             }
+            return factors
         }
-
-        cacheLock.lock()
-        normalizationCache[nmax] = factors
-        cacheLock.unlock()
-        return factors
     }
 
     /// 计算阶乘数组
