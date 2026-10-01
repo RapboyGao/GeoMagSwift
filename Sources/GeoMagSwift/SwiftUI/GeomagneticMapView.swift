@@ -597,21 +597,15 @@ private struct LongPressMapView: UIViewRepresentable {
     }
 }
 
-#if DEBUG
-/// 地图视图预览，展示已有选点时的结果状态。
-///
-/// Preview for the map view with an initially selected location.
 @available(iOS 16.0, macCatalyst 16.0, *)
-private struct GeomagneticMapView_Previews: PreviewProvider {
-    static var previews: some View {
-        GeomagneticMapView(
-            initialCoordinate: CLLocationCoordinate2D(latitude: 39.9042, longitude: 116.4074),
-            initialModel: .wmm2025,
-            initialAltitude: Measurement(value: 43, unit: .feet)
-        )
-        .previewDisplayName("Geomagnetic Map / 地磁场地图")
-    }
+#Preview("Geomagnetic Map / 地磁场地图") {
+    // Preview with Beijing selected so the result card is visible in Canvas.
+    // 预览默认选中北京，方便在 Canvas 中直接看到结果卡片。
+    GeomagneticMapView(
+        initialCoordinate: CLLocationCoordinate2D(latitude: 39.9042, longitude: 116.4074),
+        initialModel: .wmm2025,
+        initialAltitude: Measurement(value: 43, unit: .feet)
+    )
 }
-#endif
 
 #endif

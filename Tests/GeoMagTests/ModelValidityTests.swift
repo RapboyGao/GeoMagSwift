@@ -68,6 +68,15 @@ func testYearInRangeDoesNotThrow() throws {
     _ = try model.calculate(latitude: latitude, longitude: longitude, altitude: altitude, year: maxEpoch)
 }
 
+@Test("自动模型选择不会默认使用 WMMHR2025")
+func testBestModelDoesNotSelectWMMHRByDefault() throws {
+    let model = try SHCModel.bestModel(for: 2025.0)
+
+    // Automatic selection must not touch the high-resolution WMMHR resource.
+    // 自动选择不能访问高分辨率 WMMHR 资源。
+    #expect(!model.fileName.lowercased().contains("wmmhr"))
+}
+
 @Test("所有模型 JSON 资源均可解析")
 func testAllModelResourcesDecode() throws {
     let modelNames = [

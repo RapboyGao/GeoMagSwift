@@ -402,9 +402,12 @@ public extension SHCModel {
     /// 根据年份选择最合适的模型
     ///
     /// Select the best available model for a given year
+    ///
+    /// WMMHR2025 is intentionally excluded from automatic selection because it
+    /// is a high-resolution resource and must be loaded only when explicitly requested.
+    /// WMMHR2025 不参与自动选择，因为它是高分辨率资源，只有显式请求时才应加载。
     static func bestModel(for year: Double) throws -> SHCModel {
         let candidates: [SHCModel] = [
-            .wmmhr2025,
             .wmm2025,
             .wmm2020,
             .wmm2015,
