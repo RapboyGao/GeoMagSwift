@@ -20,6 +20,7 @@ jobs:
           xcodebuild -version
           xcrun swift --version
           xcrun --find swift
+          xcrun --find swift-format
 
       - name: Test Package
         run: swift test -v --scratch-path "$RUNNER_TEMP/geomagswift-macos-build"
@@ -32,7 +33,7 @@ jobs:
             --scratch-path "$RUNNER_TEMP/geomagswift-ios-build"
 
       - name: Validate Swift formatting
-        run: swift-format lint --strict --recursive Sources Tests
+        run: xcrun swift-format lint --strict --recursive Sources Tests
 
       - name: Validate generators and JSON resources
         run: |
