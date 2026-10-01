@@ -178,7 +178,7 @@ def _write_model_file(doc: WMMDoc, version: int) -> None:
     lines.append("    ///")
     lines.append(f"    /// 有效 epoch: {epoch_str} - {epoch_next}")
     lines.append(f"    /// Valid epochs: {epoch_str} - {epoch_next}")
-    lines.append(f"    static let {model_name}: SHCModel = try! SHCModel.loadResource(\"{model_name}\")")
+    lines.append(f"    static let {model_name}: SHCModel = SHCModel.requiredResource(\"{model_name}\")")
     lines.append("}")
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

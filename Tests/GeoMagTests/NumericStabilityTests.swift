@@ -14,7 +14,7 @@ func testExtremeInputsAreFinite() throws {
 
     let latitudes = [-89.999, -60.0, 0.0, 60.0, 89.999]
     let longitudes = [-180.0, -179.999, 0.0, 179.999, 180.0]
-    let altitudes = [-0.1, 0.0, 100.0] // km
+    let altitudes = [-0.1, 0.0, 100.0]  // km
 
     func expectFinite(_ value: Double, _ label: String) {
         #expect(value.isFinite, "\(label) should be finite")

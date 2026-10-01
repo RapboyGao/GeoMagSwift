@@ -23,3 +23,14 @@
 "geomagnetic_map_latitude" = "Latitude";
 "geomagnetic_map_longitude" = "Longitude";
 "geomagnetic_map_calculation_error" = "Calculation Error";
+
+"geomagnetic_map_error_invalid_altitude" = "Altitude must be a finite value.";
+"geomagnetic_map_error_invalid_input" = "Invalid input: %@.";
+"geomagnetic_map_error_invalid_model_degree" = "Invalid model degree %d; maximum is %d.";
+"geomagnetic_map_error_invalid_coefficient_index" = "Invalid coefficient index (n=%d, m=%d).";
+"geomagnetic_map_error_invalid_coefficient_values" = "Invalid coefficient values (n=%d, m=%d).";
+"geomagnetic_map_error_invalid_validity_range" = "The selected model has an invalid validity range.";
+"geomagnetic_map_error_invalid_epochs" = "The selected model has invalid epochs.";
+"geomagnetic_map_error_no_model_for_year" = "No model is available for year %.2f.";
+"geomagnetic_map_error_date_range" = "Date must be between %.2f and %.2f.";
+"geomagnetic_map_error_invalid_output" = "Calculation produced an invalid %@ value.";

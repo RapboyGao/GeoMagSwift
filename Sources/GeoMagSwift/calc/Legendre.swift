@@ -10,8 +10,10 @@ internal enum Legendre {
     /// first-time calculations remain race-free.
     /// Thread-safe storage for normalization factors.
     private final class NormalizationCache: @unchecked Sendable {
+        private let maximumEntries = 8
         private let lock = NSLock()
         private var values: [Int: [[Double]]] = [:]
+        private var usageOrder: [Int] = []
 
         func value(for nmax: Int, makeValue: () -> [[Double]]) -> [[Double]] {
             // Hold the lock through creation to prevent duplicate writes and races.
@@ -20,11 +22,18 @@ internal enum Legendre {
             defer { lock.unlock() }
 
             if let cached = values[nmax] {
+                usageOrder.removeAll { $0 == nmax }
+                usageOrder.append(nmax)
                 return cached
             }
 
             let value = makeValue()
             values[nmax] = value
+            usageOrder.append(nmax)
+            if usageOrder.count > maximumEntries, let evicted = usageOrder.first {
+                usageOrder.removeFirst()
+                values.removeValue(forKey: evicted)
+            }
             return value
         }
     }

@@ -71,8 +71,13 @@ public extension SHCModel {
         }
 
         do {
-            return try JSONDecoder().decode(SHCModel.self, from: data)
+            let model = try JSONDecoder().decode(SHCModel.self, from: data)
+            try model.validateModel()
+            return model
         } catch {
+            if let validationError = error as? SHCModel.ValidationError {
+                throw validationError
+            }
             throw ResourceError.resourceDecodeFailed(name: name, reason: String(reflecting: error))
         }
     }

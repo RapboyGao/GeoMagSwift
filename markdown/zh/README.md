@@ -128,6 +128,8 @@ struct ContentView: View {
 
 该视图内部使用 `MKMapView` 以兼容 iOS 16，不会申请用户定位权限。长按地图即可选择位置。
 
+核心类型 `SHCModel.BuiltInModel` 可在所有支持的平台使用，访问其 `model` 属性时才会加载对应的 JSON 资源。`wmmhr2025` 不参与自动选模，只有显式选择时才会加载。
+
 ## 📊 模型
 
 GeoMagSwift 包含以下磁场模型：

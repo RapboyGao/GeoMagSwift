@@ -10,6 +10,7 @@ GeoMagSwift provides fast, offline geomagnetic field computation based on spheri
 - Support multiple model generations (IGRF/WMM/WMMHR).
 - Deterministic and suitable for navigation, mapping, and scientific analysis.
 - Designed to run without network access once model data is embedded.
+- `wmmhr2025` is loaded only when explicitly requested; automatic selection uses standard-resolution models.
 
 ## Repository
 
@@ -110,6 +111,7 @@ The model also provides how the field changes per year. It calculates derivative
 ### Models
 
 - ``SHCModel``
+- ``SHCModel/BuiltInModel``
 
 ### Results
 

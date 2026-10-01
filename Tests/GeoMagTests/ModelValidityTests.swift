@@ -77,6 +77,30 @@ func testBestModelDoesNotSelectWMMHRByDefault() throws {
     #expect(!model.fileName.lowercased().contains("wmmhr"))
 }
 
+@Test("自动模型选择按年份返回标准模型")
+func testBestModelUsesTheExpectedStandardModel() throws {
+    let cases: [(year: Double, firstEpoch: Double)] = [
+        (2010.0, 2010.0),
+        (2015.0, 2015.0),
+        (2020.0, 2020.0),
+        (2025.0, 2025.0),
+        (1900.0, 1900.0),
+    ]
+
+    for testCase in cases {
+        let model = try SHCModel.bestModel(for: testCase.year)
+        #expect(model.epochs.first == testCase.firstEpoch)
+        #expect(!model.fileName.lowercased().contains("wmmhr"))
+    }
+}
+
+@Test("显式加载 WMMHR2025 仍然可用")
+func testExplicitWMMHRLoadingRemainsAvailable() throws {
+    let model = SHCModel.BuiltInModel.wmmhr2025.model
+    #expect(model.fileName.lowercased().contains("wmmhr"))
+    #expect(model.nmax > SHCModel.wmm2025.nmax)
+}
+
 @Test("所有模型 JSON 资源均可解析")
 func testAllModelResourcesDecode() throws {
     let modelNames = [
@@ -180,6 +204,42 @@ func testInvalidModelInputsThrowValidationErrors() {
             latitude: 0.0, longitude: 0.0, altitude: 0.0, year: 2020.0)
     }
 
+    let emptyModel = SHCModel(
+        fileName: "empty",
+        headers: [],
+        headerNumbers: [],
+        epochs: [],
+        coefficients: []
+    )
+    expectValidationError(.invalidNmax(value: 0, maximum: 720)) {
+        _ = try emptyModel.calculate(
+            latitude: 0.0, longitude: 0.0, altitude: 0.0, year: 2020.0)
+    }
+
+    let unorderedEpochModel = SHCModel(
+        fileName: "unordered-epochs",
+        headers: [],
+        headerNumbers: [],
+        epochs: [2025.0, 2020.0],
+        coefficients: [SHCModel.Coefficient(n: 1, m: 0, kind: .g, values: validValues)]
+    )
+    expectValidationError(.invalidValidityRange) {
+        _ = try unorderedEpochModel.calculate(
+            latitude: 0.0, longitude: 0.0, altitude: 0.0, year: 2020.0)
+    }
+
+    let zeroFieldModel = SHCModel(
+        fileName: "zero-field",
+        headers: [],
+        headerNumbers: [],
+        epochs: validEpochs,
+        coefficients: [SHCModel.Coefficient(n: 1, m: 0, kind: .g, values: [0.0, 0.0])]
+    )
+    expectValidationError(.invalidOutput(parameter: "mainField")) {
+        _ = try zeroFieldModel.calculate(
+            latitude: 0.0, longitude: 0.0, altitude: 0.0, year: 2020.0)
+    }
+
     expectValidationError(.invalidInput(parameter: "latitude")) {
         _ = try SHCModel.wmm2025.calculate(
             latitude: .nan, longitude: 0.0, altitude: 0.0, year: 2025.0)
@@ -187,6 +247,10 @@ func testInvalidModelInputsThrowValidationErrors() {
     expectValidationError(.invalidInput(parameter: "altitude")) {
         _ = try SHCModel.wmm2025.calculate(
             latitude: 0.0, longitude: 0.0, altitude: -10_000.0, year: 2025.0)
+    }
+    expectValidationError(.invalidInput(parameter: "year")) {
+        _ = try SHCModel.wmm2025.calculate(
+            latitude: 0.0, longitude: 0.0, altitude: 0.0, year: .infinity)
     }
 }
 

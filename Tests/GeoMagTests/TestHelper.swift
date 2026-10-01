@@ -144,25 +144,25 @@ struct MagneticModelTestConfig {
 
             let sv = result.secularVariation
             #expect(
-                abs(sv.north - api.xcomponent_sv) <= maxErrorNT,
+                abs(sv.north - api.xcomponentSV) <= maxErrorNT,
                 "Secular variation north component at \(locationDesc) exceeds error threshold")
             #expect(
-                abs(sv.east - api.ycomponent_sv) <= maxErrorNT,
+                abs(sv.east - api.ycomponentSV) <= maxErrorNT,
                 "Secular variation east component at \(locationDesc) exceeds error threshold")
             #expect(
-                abs(sv.down - api.zcomponent_sv) <= maxErrorNT,
+                abs(sv.down - api.zcomponentSV) <= maxErrorNT,
                 "Secular variation down component at \(locationDesc) exceeds error threshold")
             #expect(
-                abs(sv.horizontalIntensity - api.horintensity_sv) <= maxErrorNT,
+                abs(sv.horizontalIntensity - api.horintensitySV) <= maxErrorNT,
                 "Secular variation horizontal intensity at \(locationDesc) exceeds error threshold")
             #expect(
-                abs(sv.totalIntensity - api.totalintensity_sv) <= maxErrorNT,
+                abs(sv.totalIntensity - api.totalintensitySV) <= maxErrorNT,
                 "Secular variation total intensity at \(locationDesc) exceeds error threshold")
             #expect(
-                abs(sv.declination.arcMinutes - api.declination_sv * 60.0) <= maxErrorArcMin,
+                abs(sv.declination.arcMinutes - api.declinationSV * 60.0) <= maxErrorArcMin,
                 "Secular variation declination arc minutes at \(locationDesc) exceeds error threshold")
             #expect(
-                abs(sv.inclination.arcMinutes - api.inclination_sv * 60.0) <= maxErrorArcMin,
+                abs(sv.inclination.arcMinutes - api.inclinationSV * 60.0) <= maxErrorArcMin,
                 "Secular variation inclination arc minutes at \(locationDesc) exceeds error threshold")
         }
     }
@@ -185,13 +185,30 @@ struct Response: Decodable {
         let zcomponent: Double
         let horintensity: Double
         let totalintensity: Double
-        let declination_sv: Double
-        let inclination_sv: Double
-        let xcomponent_sv: Double
-        let ycomponent_sv: Double
-        let zcomponent_sv: Double
-        let horintensity_sv: Double
-        let totalintensity_sv: Double
+        let declinationSV: Double
+        let inclinationSV: Double
+        let xcomponentSV: Double
+        let ycomponentSV: Double
+        let zcomponentSV: Double
+        let horintensitySV: Double
+        let totalintensitySV: Double
+
+        enum CodingKeys: String, CodingKey {
+            case declination
+            case inclination
+            case xcomponent
+            case ycomponent
+            case zcomponent
+            case horintensity
+            case totalintensity
+            case declinationSV = "declination_sv"
+            case inclinationSV = "inclination_sv"
+            case xcomponentSV = "xcomponent_sv"
+            case ycomponentSV = "ycomponent_sv"
+            case zcomponentSV = "zcomponent_sv"
+            case horintensitySV = "horintensity_sv"
+            case totalintensitySV = "totalintensity_sv"
+        }
     }
     let result: [Result]
 }

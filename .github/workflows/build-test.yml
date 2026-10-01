@@ -3,8 +3,10 @@ name: Build and Test
 on:
   push:
     branches: [main, master]
+    tags: ["v*"]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
 
 jobs:
   build-test:
@@ -20,7 +22,38 @@ jobs:
           xcrun --find swift
 
       - name: Test Package
-        run: swift test -v
+        run: swift test -v --scratch-path "$RUNNER_TEMP/geomagswift-macos-build"
+
+      - name: Build iOS package
+        run: |
+          swift build \
+            --sdk "$(xcrun --sdk iphonesimulator --show-sdk-path)" \
+            --triple arm64-apple-ios16.0-simulator \
+            --scratch-path "$RUNNER_TEMP/geomagswift-ios-build"
+
+      - name: Validate Swift formatting
+        run: swift-format lint --strict --recursive Sources Tests
+
+      - name: Validate generators and JSON resources
+        run: |
+          python3 -m py_compile generate_igrf_data.py generate_wmm_data.py generate_wmmhr_data.py Tests/generator_smoke_test.py
+          python3 Tests/generator_smoke_test.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          required = {"fileName", "headers", "headerNumbers", "epochs", "validFrom", "validTo", "coefficients"}
+          for path in sorted(Path("Sources/GeoMagSwift/Resources").glob("*.json")):
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              missing = required.difference(payload)
+              if missing:
+                  raise SystemExit(f"{path}: missing keys: {sorted(missing)}")
+              if not payload["fileName"] or len(payload["epochs"]) < 2 or not payload["coefficients"]:
+                  raise SystemExit(f"{path}: incomplete model resource")
+          PY
+
+      - name: Check diff formatting
+        run: git diff --check
 
       # - name: Generate Docc
       #   run: swift package --allow-writing-to-directory .github/.pages \

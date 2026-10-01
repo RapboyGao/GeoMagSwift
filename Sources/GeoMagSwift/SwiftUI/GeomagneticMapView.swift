@@ -5,63 +5,6 @@ import Foundation
 import MapKit
 import SwiftUI
 
-/// 内置地磁模型选项，供 SwiftUI 地图视图使用。
-///
-/// Built-in geomagnetic model options used by the SwiftUI map view.
-@available(iOS 16.0, macCatalyst 16.0, *)
-public extension SHCModel {
-    enum BuiltInModel: String, CaseIterable, Identifiable, Sendable {
-        case igrf10
-        case igrf11
-        case igrf12
-        case igrf13
-        case igrf14
-        case wmm2010
-        case wmm2015
-        case wmm2020
-        case wmm2025
-        case wmmhr2025
-
-        public var id: String { rawValue }
-
-        /// 显示名称。
-        ///
-        /// Human-readable model name.
-        public var displayName: String {
-            switch self {
-            case .igrf10: return "IGRF-10"
-            case .igrf11: return "IGRF-11"
-            case .igrf12: return "IGRF-12"
-            case .igrf13: return "IGRF-13"
-            case .igrf14: return "IGRF-14"
-            case .wmm2010: return "WMM-2010"
-            case .wmm2015: return "WMM-2015"
-            case .wmm2020: return "WMM-2020"
-            case .wmm2025: return "WMM-2025"
-            case .wmmhr2025: return "WMMHR-2025"
-            }
-        }
-
-        /// 对应的球谐模型。
-        ///
-        /// The spherical harmonic model represented by this option.
-        public var model: SHCModel {
-            switch self {
-            case .igrf10: return .igrf10
-            case .igrf11: return .igrf11
-            case .igrf12: return .igrf12
-            case .igrf13: return .igrf13
-            case .igrf14: return .igrf14
-            case .wmm2010: return .wmm2010
-            case .wmm2015: return .wmm2015
-            case .wmm2020: return .wmm2020
-            case .wmm2025: return .wmm2025
-            case .wmmhr2025: return .wmmhr2025
-            }
-        }
-    }
-}
-
 /// Foundation UnitLength 的完整选择列表。
 ///
 /// Complete selection list for Foundation UnitLength.
@@ -451,7 +394,7 @@ public struct GeomagneticMapView: View {
             .converted(to: .kilometers).value
         guard altitudeValue.isFinite, altitudeKilometers.isFinite else {
             solution = nil
-            calculationError = "Altitude must be a finite value."
+            calculationError = I18n.mapInvalidAltitude
             return
         }
 
@@ -474,25 +417,30 @@ public struct GeomagneticMapView: View {
         case let error as SHCModel.SHCModelError:
             switch error {
             case .yearOutOfRange(_, let range):
-                return
-                    "Date must be between \(format(range.lowerBound, decimals: 2)) and \(format(range.upperBound, decimals: 2))."
+                return I18n.formatted(
+                    I18n.mapDateRange,
+                    range.lowerBound,
+                    range.upperBound
+                )
             case .noModelForYear(let year):
-                return "No model is available for year \(format(year, decimals: 2))."
+                return I18n.formatted(I18n.mapNoModelForYear, year)
             case .invalidEpochs:
-                return "The selected model has invalid epochs."
+                return I18n.mapInvalidEpochs
             }
         case let error as SHCModel.ValidationError:
             switch error {
             case .invalidInput(let parameter):
-                return "Invalid input: \(parameter)."
+                return I18n.formatted(I18n.mapInvalidInput, parameter)
             case .invalidNmax(let value, let maximum):
-                return "Invalid model degree \(value); maximum is \(maximum)."
+                return I18n.formatted(I18n.mapInvalidModelDegree, value, maximum)
             case .invalidCoefficientIndex(let n, let m):
-                return "Invalid coefficient index (n=\(n), m=\(m))."
+                return I18n.formatted(I18n.mapInvalidCoefficientIndex, n, m)
             case .invalidCoefficientValues(let n, let m):
-                return "Invalid coefficient values (n=\(n), m=\(m))."
+                return I18n.formatted(I18n.mapInvalidCoefficientValues, n, m)
             case .invalidValidityRange:
-                return "The selected model has an invalid validity range."
+                return I18n.mapInvalidValidityRange
+            case .invalidOutput(let parameter):
+                return I18n.formatted(I18n.mapInvalidOutput, parameter)
             }
         default:
             return String(describing: error)

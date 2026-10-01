@@ -10,6 +10,7 @@ GeoMagSwift 提供基于球谐系数（SHC）模型（如 IGRF、WMM）的快速
 - 支持多代模型（IGRF/WMM/WMMHR）。
 - 结果确定、适用于导航、制图与科研。
 - 模型内置后可完全离线运行。
+- `wmmhr2025` 只有显式请求时才会加载，自动选模使用标准分辨率模型。
 
 ## 仓库地址
 
@@ -104,6 +105,7 @@ GeoMagSwift 提供基于球谐系数（SHC）模型（如 IGRF、WMM）的快速
 ### Models
 
 - ``SHCModel``
+- ``SHCModel/BuiltInModel``
 
 ### Results
 

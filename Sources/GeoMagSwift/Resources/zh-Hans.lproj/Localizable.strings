@@ -23,3 +23,13 @@
 "geomagnetic_map_latitude" = "纬度";
 "geomagnetic_map_longitude" = "经度";
 "geomagnetic_map_calculation_error" = "计算错误";
+"geomagnetic_map_error_invalid_altitude" = "海拔必须是有限值。";
+"geomagnetic_map_error_invalid_input" = "输入无效：%@。";
+"geomagnetic_map_error_invalid_output" = "计算产生了无效的 %@ 值。";
+"geomagnetic_map_error_invalid_model_degree" = "模型阶数 %d 无效；最大值为 %d。";
+"geomagnetic_map_error_invalid_coefficient_index" = "系数索引无效（n=%d，m=%d）。";
+"geomagnetic_map_error_invalid_coefficient_values" = "系数值无效（n=%d，m=%d）。";
+"geomagnetic_map_error_invalid_validity_range" = "所选模型的有效范围无效。";
+"geomagnetic_map_error_invalid_epochs" = "所选模型的历元无效。";
+"geomagnetic_map_error_no_model_for_year" = "没有适用于 %.2f 年的模型。";
+"geomagnetic_map_error_date_range" = "日期必须介于 %.2f 和 %.2f 之间。";

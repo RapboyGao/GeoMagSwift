@@ -98,10 +98,14 @@ extension MagneticFieldSolution: CustomStringConvertible {
         let svLine1 = "\(I18n.north): \(format(secularVariation.north)) \(I18n.unitNTPerYear)"
         let svLine2 = "\(I18n.east): \(format(secularVariation.east)) \(I18n.unitNTPerYear)"
         let svLine3 = "\(I18n.down): \(format(secularVariation.down)) \(I18n.unitNTPerYear)"
-        let svLine4 = "\(I18n.horizontalIntensity): \(format(secularVariation.horizontalIntensity)) \(I18n.unitNTPerYear)"
-        let svLine5 = "\(I18n.totalIntensity): \(format(secularVariation.totalIntensity)) \(I18n.unitNTPerYear)"
-        let svLine6 = "\(I18n.declination): \(format(secularVariation.declination.arcMinutes)) \(I18n.unitArcMinPerYear)"
-        let svLine7 = "\(I18n.inclination): \(format(secularVariation.inclination.arcMinutes)) \(I18n.unitArcMinPerYear)"
+        let svLine4 =
+            "\(I18n.horizontalIntensity): \(format(secularVariation.horizontalIntensity)) \(I18n.unitNTPerYear)"
+        let svLine5 =
+            "\(I18n.totalIntensity): \(format(secularVariation.totalIntensity)) \(I18n.unitNTPerYear)"
+        let svLine6 =
+            "\(I18n.declination): \(format(secularVariation.declination.arcMinutes)) \(I18n.unitArcMinPerYear)"
+        let svLine7 =
+            "\(I18n.inclination): \(format(secularVariation.inclination.arcMinutes)) \(I18n.unitArcMinPerYear)"
 
         return [
             "\(I18n.magneticFieldSolutionTitle)",

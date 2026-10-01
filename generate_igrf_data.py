@@ -226,7 +226,7 @@ def _write_model_file(doc: IGRFDoc) -> None:
         else:
             lines.append(f"    /// 有效 epoch: {epochs_str}")
             lines.append(f"    /// Valid epochs: {epochs_str}")
-    lines.append(f"    static let {model_name}: SHCModel = try! SHCModel.loadResource(\"{model_name}\")")
+    lines.append(f"    static let {model_name}: SHCModel = SHCModel.requiredResource(\"{model_name}\")")
     lines.append("}")
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # 定义项目名称变量
 PROJECT_NAME="GeoMagSwift"
 # 创建项目名称的小写版本
@@ -33,12 +35,6 @@ generate-documentation \
 --transform-for-static-hosting \
 --hosting-base-path "$PROJECT_NAME" \
 --output-path .github/.pages
-
-# 检查文档生成是否成功
-if [ $? -ne 0 ]; then
-    echo "错误：生成文档失败"
-    exit 1
-fi
 
 # 创建重定向 HTML 文件，将访问者重定向到文档页面
 cat > .github/.pages/index.html << EOF

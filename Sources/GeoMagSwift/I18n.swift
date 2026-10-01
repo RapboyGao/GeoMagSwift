@@ -34,4 +34,27 @@ internal enum I18n {
     static let mapLatitude = string("geomagnetic_map_latitude", "Latitude")
     static let mapLongitude = string("geomagnetic_map_longitude", "Longitude")
     static let mapCalculationError = string("geomagnetic_map_calculation_error", "Calculation Error")
+    static let mapInvalidAltitude = string(
+        "geomagnetic_map_error_invalid_altitude", "Altitude must be a finite value.")
+    static let mapInvalidInput = string("geomagnetic_map_error_invalid_input", "Invalid input: %@.")
+    static let mapInvalidOutput = string(
+        "geomagnetic_map_error_invalid_output", "Calculation produced an invalid %@ value.")
+    static let mapInvalidModelDegree = string(
+        "geomagnetic_map_error_invalid_model_degree", "Invalid model degree %d; maximum is %d.")
+    static let mapInvalidCoefficientIndex = string(
+        "geomagnetic_map_error_invalid_coefficient_index", "Invalid coefficient index (n=%d, m=%d).")
+    static let mapInvalidCoefficientValues = string(
+        "geomagnetic_map_error_invalid_coefficient_values", "Invalid coefficient values (n=%d, m=%d).")
+    static let mapInvalidValidityRange = string(
+        "geomagnetic_map_error_invalid_validity_range", "The selected model has an invalid validity range.")
+    static let mapInvalidEpochs = string(
+        "geomagnetic_map_error_invalid_epochs", "The selected model has invalid epochs.")
+    static let mapNoModelForYear = string(
+        "geomagnetic_map_error_no_model_for_year", "No model is available for year %.2f.")
+    static let mapDateRange = string(
+        "geomagnetic_map_error_date_range", "Date must be between %.2f and %.2f.")
+
+    static func formatted(_ format: String, _ arguments: CVarArg...) -> String {
+        String(format: format, locale: Locale.current, arguments: arguments)
+    }
 }

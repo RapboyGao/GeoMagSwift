@@ -128,6 +128,8 @@ struct ContentView: View {
 
 The view uses `MKMapView` internally for iOS 16 compatibility and does not request location permission. Long press the map to select a point.
 
+The core `SHCModel.BuiltInModel` type is available on all supported package platforms. Its `model` property loads only the selected JSON resource. `wmmhr2025` is intentionally excluded from automatic model selection and is loaded only when explicitly selected.
+
 ## 📊 Models
 
 GeoMagSwift includes the following magnetic field models:
@@ -184,6 +186,8 @@ The `SHCModel` struct provides access to all available magnetic field models:
 - `wmm2020`: WMM2020 model
 - `wmm2015`: WMM2015 model
 - `wmm2010`: WMM2010 model
+
+`SHCModel.BuiltInModel` provides a type-safe list of all bundled models for model pickers and other UI integrations.
 
 
 ### Convenience APIs

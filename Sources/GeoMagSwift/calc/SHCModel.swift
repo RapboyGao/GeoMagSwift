@@ -18,7 +18,7 @@ import Foundation
 public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
     /// Upper bound for model degree to prevent oversized calculation matrices.
     /// 模型阶数上限，用于防止分配过大的计算矩阵。
-    private static let maximumSupportedNmax = 720
+    internal static let maximumSupportedNmax = 720
 
     /// 模型文件名，用于唯一标识模型
     ///
@@ -139,6 +139,9 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
         /// 模型有效期不是有限值，或起止顺序无效。
         /// The model validity range is not finite or ordered.
         case invalidValidityRange
+        /// 计算结果包含非有限值。
+        /// The calculated result contains a non-finite value.
+        case invalidOutput(parameter: String)
     }
 
     /// 计算指定位置和日期的地磁场
@@ -221,10 +224,24 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
             nmax: nmax, g: g, h: h, latitude: latitude, longitude: longitude, altitude: altitude, workspace: &workspace)
         let mainField = MagneticFieldResult(north: main.north, east: main.east, down: main.down)
 
+        guard mainField.north.isFinite, mainField.east.isFinite, mainField.down.isFinite,
+            mainField.horizontalIntensity.isFinite, mainField.totalIntensity.isFinite,
+            mainField.horizontalIntensity > 0.0, mainField.totalIntensity > 0.0
+        else {
+            throw ValidationError.invalidOutput(parameter: "mainField")
+        }
+
         let secular = SphericalHarmonics.fieldComponents(
             nmax: nmax, g: gDot, h: hDot, latitude: latitude, longitude: longitude, altitude: altitude,
             workspace: &workspace)
         let sec = MagneticFieldSecularVariation(mainField: mainField, derivative: secular)
+
+        guard sec.north.isFinite, sec.east.isFinite, sec.down.isFinite,
+            sec.horizontalIntensity.isFinite, sec.totalIntensity.isFinite,
+            sec.declination.radians.isFinite, sec.inclination.radians.isFinite
+        else {
+            throw ValidationError.invalidOutput(parameter: "secularVariation")
+        }
 
         return MagneticFieldSolution(mainField: mainField, secularVariation: sec)
     }
@@ -269,12 +286,25 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
     /// 在分配计算矩阵前校验模型数据，避免越界和异常内存消耗。
     ///
     /// Validate model data before allocating calculation matrices.
-    private func validateModel() throws {
+    internal func validateModel() throws {
+        guard !fileName.isEmpty else {
+            throw ValidationError.invalidInput(parameter: "fileName")
+        }
+
         guard nmax >= 1, nmax <= Self.maximumSupportedNmax else {
             throw ValidationError.invalidNmax(value: nmax, maximum: Self.maximumSupportedNmax)
         }
 
         guard validFrom.isFinite, validTo.isFinite, validFrom <= validTo else {
+            throw ValidationError.invalidValidityRange
+        }
+
+        guard epochs.count >= 2,
+            let firstEpoch = epochs.first,
+            let lastEpoch = epochs.last,
+            validFrom >= firstEpoch,
+            validTo <= lastEpoch
+        else {
             throw ValidationError.invalidValidityRange
         }
 
@@ -399,6 +429,18 @@ public struct SHCModel: Sendable, Hashable, Codable, Identifiable {
 }
 
 public extension SHCModel {
+    private static let automaticModelCandidates: [(name: String, validFrom: Double, validTo: Double)] = [
+        ("wmm2025", 2025.0, 2030.0),
+        ("wmm2020", 2020.0, 2025.0),
+        ("wmm2015", 2015.0, 2020.0),
+        ("wmm2010", 2010.0, 2015.0),
+        ("igrf14", 1900.0, 2030.0),
+        ("igrf13", 1900.0, 2025.0),
+        ("igrf12", 1900.0, 2020.0),
+        ("igrf11", 1900.0, 2015.0),
+        ("igrf10", 1900.0, 2005.0),
+    ]
+
     /// 根据年份选择最合适的模型
     ///
     /// Select the best available model for a given year
@@ -407,21 +449,13 @@ public extension SHCModel {
     /// is a high-resolution resource and must be loaded only when explicitly requested.
     /// WMMHR2025 不参与自动选择，因为它是高分辨率资源，只有显式请求时才应加载。
     static func bestModel(for year: Double) throws -> SHCModel {
-        let candidates: [SHCModel] = [
-            .wmm2025,
-            .wmm2020,
-            .wmm2015,
-            .wmm2010,
-            .igrf14,
-            .igrf13,
-            .igrf12,
-            .igrf11,
-            .igrf10,
-        ]
-        for model in candidates {
-            let range = model.validFrom...model.validTo
-            if range.contains(year) {
-                return model
+        guard year.isFinite else {
+            throw ValidationError.invalidInput(parameter: "year")
+        }
+
+        for candidate in automaticModelCandidates {
+            if (candidate.validFrom...candidate.validTo).contains(year) {
+                return try loadResource(candidate.name)
             }
         }
         throw SHCModelError.noModelForYear(year: year)

@@ -119,7 +119,8 @@ internal enum SphericalHarmonics {
         let cosMLon = workspace.cosMLon
         let sinMLon = workspace.sinMLon
 
-        Legendre.schmidtNormalized(nmax: nmax, theta: SHCAngle.radians(coords.theta), p: &workspace.p, dp: &workspace.dp)
+        Legendre.schmidtNormalized(
+            nmax: nmax, theta: SHCAngle.radians(coords.theta), p: &workspace.p, dp: &workspace.dp)
         let p = workspace.p
         let dp = workspace.dp
 
